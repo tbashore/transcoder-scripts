@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, re
+import os, re, sys
 from threading import Thread
 from time import sleep
 
@@ -9,132 +9,16 @@ from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 from mutagen.id3 import TPOS
 
+from codec import *
+sys.path.append(sys.path[0] + '/codecs')
+from flaccodec import FLACCodec
+from mp3codec import MP3Codec
+
 ext_source = '.flac'
 ext_intermediate = '.wav'
 ext_target = '.mp3'
 
 #available_codecs = []
-
-class DecodingError(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return str(self.value)
-
-class EncodingError(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return str(self.value)
-
-# Parent codec class.
-class Codec:
-	def __init__(self):
-		#available_codecs.append(self)
-		pass
-	
-	def GetCapabilities(self):
-		pass
-
-class FLACCodec(Codec):
-	def __init__(self):
-		Codec.__init__(self)
-
-	class DecoderThread(Thread):
-		def __init__(self, source_file):
-			Thread.__init__(self)
-			self.capabilities = {}
-			self.capabilities['input'] = '.flac'
-			self.capabilities['output'] = '.wav'
-
-			self.source_file = source_file
-			self.target_file = (os.path.splitext(source_file))[0] + self.capabilities['output']
-
-		def GetCapabilities(self):
-			self.capabilities
-		
-		def run(self):
-			if self.source_file.endswith(self.capabilities['input']) == False:
-				raise DecodingError('The source file\'s extension is incompatible with this decoder.')
-
-			execstring = 'flac -d "' + self.source_file + '" -o "' + self.target_file + '" 2>&1 > /dev/null'
-			print 'Decoding "' + self.source_file + '" to "' + self.target_file + '"...'
-			outputfd = os.popen(execstring)
-			output = outputfd.readlines()
-			exitcode = outputfd.close()
-
-	class EncoderThread(Thread):
-		def __init__(self, source_file):
-			Thread.__init__(self)
-			self.capabilities = {}
-			self.capabilities['input'] = '.wav'
-			self.capabilities['output'] = '.flac'
-
-			self.source_file = source_file
-			self.target_file = (os.path.splitext(source_file))[0] + self.capabilities['output']
-
-		def GetCapabilities(self):
-			self.capabilities
-		
-		def run(self):
-			if self.source_file.endswith(self.capabilities['input']) == False:
-				raise EncodingError('The source file\'s extension is incompatible with this encoder.')
-
-			execstring = 'flac "' + self.source_file + '" -o "' + self.target_file + '" 2>&1 > /dev/null'
-			print 'Encoding "' + self.source_file + '" to "' + self.target_file + '"...'
-			outputfd = os.popen(execstring)
-			output = outputfd.readlines()
-			exitcode = outputfd.close()
-
-class MP3Codec(Codec):
-	def __init__(self):
-		Codec.__init__(self)
-
-	class DecoderThread(Thread):
-		def __init__(self, source_file):
-			Thread.__init__(self)
-			self.capabilities = {}
-			self.capabilities['input'] = '.mp3'
-			self.capabilities['output'] = '.wav'
-
-			self.source_file = source_file
-			self.target_file = (os.path.splitext(source_file))[0] + self.capabilities['output']
-
-		def GetCapabilities(self):
-			self.capabilities
-		
-		def run(self):
-			if self.source_file.endswith(self.capabilities['input']) == False:
-				raise DecodingError('The source file\'s extension is incompatible with this decoder.')
-
-			execstring = 'lame --decode "' + self.source_file + '" "' + self.target_file + '" 2>&1 > /dev/null'
-			print 'Decoding "' + self.source_file + '" to "' + self.target_file + '"...'
-			outputfd = os.popen(execstring)
-			output = outputfd.readlines()
-			exitcode = outputfd.close()
-
-	class EncoderThread(Thread):
-		def __init__(self, source_file):
-			Thread.__init__(self)
-			self.capabilities = {}
-			self.capabilities['input'] = '.wav'
-			self.capabilities['output'] = '.mp3'
-
-			self.source_file = source_file
-			self.target_file = (os.path.splitext(source_file))[0] + self.capabilities['output']
-
-		def GetCapabilities(self):
-			self.capabilities
-
-		def run(self):
-			if self.source_file.endswith(self.capabilities['input']) == False:
-				raise DecodingError('The source file\'s extension is incompatible with this decoder.')
-
-			execstring = 'lame -V 2 --vbr-new --add-id3v2 --tc "lame 3.93 --alt-preset standard" "' + self.source_file + '" "' + self.target_file + '" 2>&1 > /dev/null'
-			print 'Encoding "' + self.source_file + '" to "' + self.target_file + '"...'
-			outputfd = os.popen(execstring)
-			output = outputfd.readlines()
-			exitcode = outputfd.close()
 
 class TranscoderThread(Thread):
 	def __init__(self, source_file):
@@ -142,6 +26,7 @@ class TranscoderThread(Thread):
 		self.source_file = source_file
 		self.intermediate_file = (os.path.splitext(source_file))[0] + ext_intermediate
 		#self.target_file = (os.path.splitext(source_file))[0] + ext_target
+
 	def run(self):
 		flac = FLACCodec
 		flacdecoder = flac.DecoderThread(self.source_file)
