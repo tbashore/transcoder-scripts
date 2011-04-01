@@ -6,4 +6,4 @@ This is a set of python scripts that transcode media files between some common f
 * Scripts depend on binary tools in your path (e.g. MP3 support requires LAME).
 
 ## To Do
-* Factor out Codec class and duplicated subclasses.
+* Factor out baseline transcoder functionality.
