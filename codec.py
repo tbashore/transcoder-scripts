@@ -1,10 +1,10 @@
 # Parent codec class.
 class Codec:
 	def __init__(self):
-		#available_codecs.append(self)
 		pass
-	
-	def GetCapabilities(self):
+   
+	@staticmethod
+	def GetExtension(self):
 		pass
 
 class DecodingError(Exception):

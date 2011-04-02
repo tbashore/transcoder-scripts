@@ -6,6 +6,10 @@ class MP3Codec(Codec):
    def __init__(self):
       Codec.__init__(self)
 
+   @staticmethod
+   def GetExtension():
+      return '.mp3'
+
    class DecoderThread(Thread):
       def __init__(self, source_file):
          Thread.__init__(self)

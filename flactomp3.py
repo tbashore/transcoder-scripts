@@ -14,10 +14,6 @@ sys.path.append(sys.path[0] + '/codecs')
 from flaccodec import FLACCodec
 from mp3codec import MP3Codec
 
-ext_source = '.flac'
-ext_intermediate = '.wav'
-ext_target = '.mp3'
-
 def CopyTags(source_file, target_file):
    f = FLAC(source_file)
    m = EasyID3(target_file)
@@ -33,5 +29,5 @@ def CopyTags(source_file, target_file):
       m.save()
 
 # Main
-trans = Transcoder(FLACCodec, MP3Codec, ext_source, CopyTags)
+trans = Transcoder(FLACCodec, MP3Codec, CopyTags)
 trans.Go()

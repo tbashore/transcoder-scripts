@@ -3,10 +3,10 @@ from time import sleep
 from transcoderthread import TranscoderThread
 
 class Transcoder():
-   def __init__(self, source_codec, target_codec, ext_source, post_process=None):
+   def __init__(self, source_codec, target_codec, post_process=None):
       self.source_codec = source_codec
       self.target_codec = target_codec
-      self.ext_source = ext_source
+      self.ext_source = source_codec.GetExtension() if source_codec else '.wav'
       self.post_process = post_process
 
    def CheckThreads(self, threadlist):
